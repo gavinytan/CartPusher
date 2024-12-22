@@ -114,12 +114,7 @@ void USphereCartActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
 			//AttachActorsWithPhysicsConstraint(GetOwner(), OtherActor, Constraint);
 		
 		}
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, OtherActor->GetClass()->GetName());
-		//if (OtherActor->GetClass()->GetName() == "BP_FirstPersonCharacter_C") {
-		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("HILLO"));
-		//	UAudioComponent* rollingSound = (UAudioComponent*)(GetOwner()->GetComponentByClass<UAudioComponent>());
-		//	rollingSound->Play();
-		//}
+
 
 	}
 }

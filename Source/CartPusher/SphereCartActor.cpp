@@ -29,9 +29,7 @@ void USphereCartActor::BeginPlay()
 	isAttached = false; //indicates that this cart's front is linked to another's back
 	// ...
 	if (true) {
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!?"));
-		//RemovePhysicsConstraints();
-		//UAudioComponent* rollingSound = (UAudioComponent*)(GetOwner()->GetComponentByClass<UAudioComponent>());
+
 
 	}
 
@@ -53,23 +51,13 @@ void USphereCartActor::BeginPlay()
 }
 void USphereCartActor::OnOverlapEndAudio(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) { //Overlap end for the audio hitbox, currently not in use
 	if (OtherActor->GetClass()->GetName() == "BP_FirstPersonCharacter_C") {
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("End Audio."));
-		//UAudioComponent* rollingSound = (UAudioComponent*)(GetOwner()->GetComponentByClass<UAudioComponent>());
-		//rollingSound->Stop();
-		//rollingSound->AdjustVolume(1, 0, EAudioFaderCurve::Linear);
-		//rollingSound->FadeOut(.1, 1, EAudioFaderCurve::Linear);
-		//rollingSound->Stop();
+
 	}
 }
 
 void USphereCartActor::OverOverlapBeginAudio(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) { //Overlap begin for the audio hitbox, currently not in use
 	if (OtherActor->GetClass()->GetName() == "BP_FirstPersonCharacter_C") {
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Begin Audio."));
-		//UAudioComponent* rollingSound = (UAudioComponent*)(GetOwner()->GetComponentByClass<UAudioComponent>());
-		//rollingSound->AdjustVolume(1, 2,EAudioFaderCurve::Linear);
-		//rollingSound->Play();
-		//rollingSound->FadeIn(.1, 1, 0, EAudioFaderCurve::Linear);
-		//rollingSound->Play();
+
 	}
 }
 
@@ -77,8 +65,7 @@ void USphereCartActor::OverOverlapBeginAudio(UPrimitiveComponent* OverlappedComp
 void USphereCartActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 { //this creates links the back cart to the front cart, constraint belongs to the back cart, this is because the code is triggered only by the front collision
 	if (GEngine) {
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("On Overlap Begin Cart"));
-		//figure out how to stop the overlapped carts
+
 		if (OtherActor->GetClass() == GetOwner()->GetClass() && isAttached==false && GetOwner()!=OtherActor && OtherComp->ComponentHasTag(FName("BackCollision")) == true) { //if the cart collides with another cart and it isn't already attached to it [Result[i]->IsAttachedTo(GetOwner())==false]
 			isAttached = true; //disables the current cart's front collision
 
@@ -93,25 +80,18 @@ void USphereCartActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
 			cartInFront->DisableBackCollision();
 			cartAttachedToFront = OtherActor; //record the attached cart
 
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, Result[i]->GetName());
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("%lld"), OtherActor->GetComponentsByTag(USceneComponent::StaticClass(), FName("AttachmentTag")).Num()));
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("%lld"), i));
+
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, OtherActor->GetClass()->GetName());
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, GetOwner()->GetName());
+
 
 
 			UPhysicsConstraintComponent* PhysicsConst = NewObject<UPhysicsConstraintComponent>(this, TEXT("PhysicsConstraint"));
-			//PhysicsConst = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("Physics Constraint"));
 			PhysicsConst->ComponentTags.Add(FName("CartLink"));
 			PhysicsConst->SetupAttachment(GetOwner()->GetRootComponent());
 			PhysicsConst->RegisterComponent();
 			AttachActorsWithPhysicsConstraint(GetOwner(), OtherActor, PhysicsConst);
 			
 
-			//UPhysicsConstraintComponent* Constraint = NewObject<UPhysicsConstraintComponent>(this, TEXT("PhysicsConstraint"));
-			//Constraint->SetupAttachment(GetOwner()->GetRootComponent());
-			//Constraint->RegisterComponent();
-			//AttachActorsWithPhysicsConstraint(GetOwner(), OtherActor, Constraint);
 		
 		}
 
@@ -220,16 +200,10 @@ void USphereCartActor::EnableBackCollision() { //enables back collision
 void USphereCartActor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	//USphereCartActor* cartInFront = (USphereCartActor*) (GetOwner()->GetComponentByClass(USphereCartActor::StaticClass()));
-	//UAudioComponent* rollingSound = (UAudioComponent*) (GetOwner()->GetComponentByClass<UAudioComponent>());
-	//rollingSound->Play();
-	//if (GetOwner()->GetVelocity()==) {
-
-	//}
 	
 	//Dynamic Sound for the carts
 	double speed = GetOwner()->GetVelocity().Length();
-	//UAudioComponent* rollingSound = (UAudioComponent*)(GetOwner()->GetComponentByClass<UAudioComponent>());
+
 	UAudioComponent* rollingSound = Cast<UAudioComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("RollingAudio"))[0]);
 	double exponent = (speed * -1) + 50;
 	double exponentResult = pow(1.1, exponent);
@@ -246,105 +220,6 @@ void USphereCartActor::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"), multiplier));
 	
 
-
-
-
-
-
-
-
-
-
-	//TArray<AActor*> Result;
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("JOEJOE"));
-
-	//GetOwner()->GetOverlappingActors(Result, USphereCartActor::StaticClass());
-	//if (GEngine) {
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("JOEJOE"));
-	//	for (int i = 0; i < Result.Num(); i++) {
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, Result[i]->GetName());
-	//	}
-	//}
-	/*
-	GetOwner()->GetOverlappingActors(Result, USphereCartActor::StaticClass());
-	if (GEngine) {
-		for (int i = 0; i < Result.Num(); i++) {
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("%lld"), Result[i]->GetComponentsByTag(USceneComponent::StaticClass(), FName("AttachmentTag")).Num()));
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, Result[i]->GetName());
-			if (Result[i]->GetClass() == GetOwner()->GetClass() && Result[i]->GetComponentsByTag(UPhysicsConstraintComponent::StaticClass(), FName("AttachmentTag")).Num() ==0) { //if the cart collides with another cart and it isn't already attached to it [Result[i]->IsAttachedTo(GetOwner())==false]
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, Result[i]->GetName());
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("%lld"), Result[i]->GetComponentsByTag(USceneComponent::StaticClass(), FName("AttachmentTag")).Num()));
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("%lld"), i));
-			
-				//GetOwner()->AttachToActor(Result[i], FAttachmentTransformRules(EAttachmentRule::KeepWorld, false));
-				UActorComponent* owner_back=GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackTag"))[0];
-				UActorComponent* other_back = Result[i]->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackTag"))[0];
-				UActorComponent* owner_front = GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontTag"))[0];
-				UActorComponent* other_front = Result[i]->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontTag"))[0];
-				UActorComponent* owner_body = GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("BodyTag"))[0];
-				UActorComponent* other_body = Result[i]->GetComponentsByTag(USceneComponent::StaticClass(), FName("BodyTag"))[0];
-
-				UActorComponent* owner_front_collision = GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontCollision"))[0];
-				UActorComponent* owner_back_collision = GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackCollision"))[0];
-				UActorComponent* other_front_collision = Result[i]->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontCollision"))[0];
-				UActorComponent* other_back_collision = Result[i]->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackCollision"))[0];
-
-
-				USceneComponent* owner_front_scene = Cast<USceneComponent>(owner_front);
-				USceneComponent* other_back_scene = Cast<USceneComponent>(other_back);
-				USceneComponent* owner_body_scene = Cast<USceneComponent>(owner_body);
-				USceneComponent* other_body_scene = Cast<USceneComponent>(other_body);
-
-				USceneComponent* owner_front_collision_scene = Cast<USceneComponent>(owner_front_collision);
-				USceneComponent* owner_back_collision_scene = Cast<USceneComponent>(owner_back_collision);
-				USceneComponent* other_front_collision_scene = Cast<USceneComponent>(other_front_collision);
-				USceneComponent* other_back_collision_scene = Cast<USceneComponent>(other_back_collision);
-
-				UPhysicsConstraintComponent* NewPhysicsConstraint = NewObject<UPhysicsConstraintComponent>();
-				NewPhysicsConstraint->ComponentTags.Add(FName("AttachmentTag"));
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%lld"), Result[i]->GetComponents().Num()));
-
-				NewPhysicsConstraint->AttachToComponent(owner_body_scene, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
-				NewPhysicsConstraint->SetupAttachment(GetOwner()->GetRootComponent());
-				NewPhysicsConstraint->RegisterComponent();
-				NewPhysicsConstraint->SetRelativeLocation(FVector(100.f, 0.f, 0.f));
-
-
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%lld"), Result[i]->GetComponentsByTag(UPhysicsConstraintComponent::StaticClass(), FName("AttachmentTag")).Num()));
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString::Printf(TEXT("%lld"), owner_front_collision->Get));
-				NewPhysicsConstraint->SetVisibility(true);
-				//NewPhysicsConstraint->SetLinearXLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
-				//NewPhysicsConstraint->SetLinearYLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
-				//NewPhysicsConstraint->SetLinearZLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
-
-				//NewPhysicsConstraint->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 0.0f);
-				//NewPhysicsConstraint->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.0f);
-				//NewPhysicsConstraint->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.0f);
-				//GetOwner()->DisableComponentsSimulatePhysics();
-				NewPhysicsConstraint->SetConstrainedComponents(Cast<UPrimitiveComponent>(owner_body_scene), NAME_None, Cast<UPrimitiveComponent>(other_body_scene), NAME_None);
-				
-				//bool test=owner_front_scene->AttachToComponent(other_back_scene, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
-				//if (test == true) {
-				//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Attached");
-				//}
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, owner_back->GetName());
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, other_back->GetName());
-			}
-
-			
-			//else if (Result[i]->GetClass() == GetOwner()->GetClass() && Result[i]->IsAttachedTo(GetOwner()) == true) { //if the cart collides with another cart
-			//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Result[i]->GetName()");
-			//	GetOwner()->AttachToActor(Result[i], FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true));
-			//}
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, GetOwner()->GetName());
-		}
-		//if (Result.Num() >= 1) {
-		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("abc"));
-		//}
-		
-	}*/
-		
-	// ...
 }
 
 

@@ -34,14 +34,20 @@ void USphereCartActor::BeginPlay()
 	}
 
 	// Bind the overlap event to the OnOverlapBegin function
-	UBoxComponent* Box = Cast<UBoxComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontCollision"))[0]);
+	UBoxComponent* Box = Cast<UBoxComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontCollision"))[0]); //for cart connections
 	UBoxComponent* AudioBox = Cast<UBoxComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("AudioCollision"))[0]);
+	UBoxComponent* PlayerBox = Cast<UBoxComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("PlayerCollision"))[0]);
+
 	if (Box) {
 		Box->OnComponentBeginOverlap.AddDynamic(this, &USphereCartActor::OnOverlapBegin);
 	}
 	if (AudioBox) {
 		AudioBox->OnComponentBeginOverlap.AddDynamic(this, &USphereCartActor::OverOverlapBeginAudio);
 		AudioBox->OnComponentEndOverlap.AddDynamic(this, &USphereCartActor::OnOverlapEndAudio);
+	}
+	if (PlayerBox) {
+		PlayerBox->OnComponentBeginOverlap.AddDynamic(this, &USphereCartActor::OnOverlapBeginPlayerHandle);
+		PlayerBox->OnComponentEndOverlap.AddDynamic(this, &USphereCartActor::OnOverlapEndPlayerHandle);
 	}
 	else {
 		//UE_LOG(LogFooBar, Warning, TEXT("%hs() => Could not find box collision component on parent!"), __func__);
@@ -58,6 +64,24 @@ void USphereCartActor::OnOverlapEndAudio(class UPrimitiveComponent* OverlappedCo
 void USphereCartActor::OverOverlapBeginAudio(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) { //Overlap begin for the audio hitbox, currently not in use
 	if (OtherActor->GetClass()->GetName() == "BP_FirstPersonCharacter_C") {
 
+	}
+}
+
+void USphereCartActor::OnOverlapEndPlayerHandle(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+	if (GEngine) {
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, OtherActor->GetClass()->GetName());
+		if (OtherActor->GetClass()->GetName() == "BP_FirstPersonCharacter_C") { //if the player is colliding
+			DisablePlayerCollision();
+		}
+	}
+}
+
+void USphereCartActor::OnOverlapBeginPlayerHandle(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if (GEngine) {
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, OtherActor->GetClass()->GetName());
+		if (OtherActor->GetClass()->GetName() == "BP_FirstPersonCharacter_C") { //if the player is colliding
+			EnablePlayerCollision();
+		}
 	}
 }
 
@@ -80,10 +104,10 @@ void USphereCartActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
 			cartInFront->DisableBackCollision();
 			cartAttachedToFront = OtherActor; //record the attached cart
 
-
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, OtherActor->GetClass()->GetName());
-
-
+			//USphereCartActor* thisCart= (USphereCartActor*)(GetOwner()->GetComponentByClass(USphereCartActor::StaticClass()));
+			//thisCart->DisableFrontCollision();
+			isFrontMostCart = false; 
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("fffffffffffffffffffffffffffffffffff"));
 
 			UPhysicsConstraintComponent* PhysicsConst = NewObject<UPhysicsConstraintComponent>(this, TEXT("PhysicsConstraint"));
 			PhysicsConst->ComponentTags.Add(FName("CartLink"));
@@ -94,6 +118,7 @@ void USphereCartActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
 
 		
 		}
+		
 
 
 	}
@@ -171,23 +196,71 @@ void USphereCartActor::RemovePhysicsConstraints()
 	}
 }
 
+void USphereCartActor::DisableFrontCollision() { //disables the front collision (used in cases where there's a cart attached to the front of the cart), called by blueprint UNUSED BECAUSE THE HITBOX IS COVERED BY THE NEXT CART ANYWAYS AND THE BACK HITBOX IS DISABLED WHEN A CART IS ATTACHED
+	UBoxComponent* Box = Cast<UBoxComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontCollision"))[0]);
+	Box->SetGenerateOverlapEvents(false);
+
+	isFrontMostCart = false;
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Disable FrontBlock"));
+}
 
 void USphereCartActor::EnableFrontCollision() { //reenables the front collision (used in cases where they detach the cart, and have stopped holding it), called by blueprint
 	UBoxComponent* Box = Cast<UBoxComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontCollision"))[0]);
 	Box->SetGenerateOverlapEvents(true);
+
+	isFrontMostCart = true;
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Enable FrontBlock"));
 }
 
-void USphereCartActor::DisableBackCollision() { //disables back collision
+void USphereCartActor::DisableBackCollision() { //disables back collision, also disables the back block
 	UBoxComponent* Box = Cast<UBoxComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackCollision"))[0]);
 	Box->SetGenerateOverlapEvents(false);
+
+	UStaticMeshComponent* BackBlock = Cast<UStaticMeshComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackBlock"))[0]);
+	BackBlock->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+	isBackMostCart = false;
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Disable Backblock"));
 }
 
-void USphereCartActor::EnableBackCollision() { //enables back collision
+void USphereCartActor::EnableBackCollision() { //enables back collision, also reenables the back block
 	UBoxComponent* Box = Cast<UBoxComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackCollision"))[0]);
 	Box->SetGenerateOverlapEvents(true);
+
+	UStaticMeshComponent* BackBlock = Cast<UStaticMeshComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackBlock"))[0]);
+	BackBlock->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+
+	isBackMostCart = true;
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Enable Backblock"));
 }
 
+void USphereCartActor::EnablePlayerCollision() { //enables the collision between the player and the handles
+	TArray<UActorComponent*> CollisionHandles = GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("CollisionHandle"));
+	for (int i = 0; i < CollisionHandles.Num(); i++) {
+		Cast<UStaticMeshComponent>(CollisionHandles[i])->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	}
+	if (isBackMostCart == false) { //if it's not the backmost cart, then redisable the collision for the BackBlock (this is because only the back most cart needs to be able to be pulled by the player)
+		UStaticMeshComponent* BackBlock = Cast<UStaticMeshComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("BackBlock"))[0]);
+		BackBlock->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	}
+	if (isFrontMostCart == false) { //if it's not the frontmost cart, then redisable the collision for the FrontBlock (this is because only the front most cart needs to be able to be pulled by the player)
+		UStaticMeshComponent* FrontBlock = Cast<UStaticMeshComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("FrontBlock"))[0]);
+		FrontBlock->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("test"));
+	}
+}
 
+void USphereCartActor::DisablePlayerCollision() { //enables the collision between the player and the handles
+	TArray<UActorComponent*> CollisionHandles = GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("CollisionHandle"));
+	for (int i = 0; i < CollisionHandles.Num(); i++) {
+		Cast<UStaticMeshComponent>(CollisionHandles[i])->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	}
+
+}
 
 
 

@@ -105,7 +105,7 @@ void USphereCartActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
 			cartAttachedToFront = OtherActor; //record the attached cart
 
 			//USphereCartActor* thisCart= (USphereCartActor*)(GetOwner()->GetComponentByClass(USphereCartActor::StaticClass()));
-			//thisCart->DisableFrontCollision();
+			//thisCart->DisableFrontCollision(); FUTURE REFERENCE: THIS IS WHERE DISABLEFRONTCOLLISION WOULD GO IF IT WERE NEEDED, ANY CODE THAT NEEDS TO BE ATTACHED TO FRONTCOLLISION DISABLED SHOULD GO AROUND HERE
 			isFrontMostCart = false; 
 			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("fffffffffffffffffffffffffffffffffff"));
 

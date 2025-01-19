@@ -8,6 +8,7 @@
 #include "Components/StaticMeshComponent.h"
 #include <PhysicsEngine/PhysicsConstraintComponent.h>
 #include "Components/BoxComponent.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values for this component's properties
 UCartHomeActor::UCartHomeActor()
@@ -43,6 +44,9 @@ void UCartHomeActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AA
 			count += 1;
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString::Printf(TEXT("%lld Cart(s) Collected"), count));
 			OtherActor->Destroy();
+
+			UAudioComponent* collectSound = Cast<UAudioComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), FName("CollectAudio"))[0]); //sound for the attachment
+			collectSound->Play();
 		}
 	}
 	
